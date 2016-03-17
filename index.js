@@ -4,6 +4,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _jquery = require('jquery');
 
 var _jquery2 = _interopRequireDefault(_jquery);
@@ -21,7 +23,7 @@ var setting = {
 };
 
 function lazyload(options) {
-  var newOptions = Object.assign(setting, options);
+  var newOptions = _extends(setting, options);
   var target = newOptions.target;
   var expand = newOptions.expand;
   var wrapMaxWidth = newOptions.wrapMaxWidth;
@@ -41,7 +43,7 @@ function lazyload(options) {
     $this.addClass('blur').addClass('loaded').attr('src', '' + src + qiniuAPI + 'w/20');
 
     // use qiniu API for image URL
-    var newImgSrc = imgSizeCND(src, { vw: vw, h: h });
+    var newImgSrc = imgSizeCND(src, { w: w, h: h, vw: vw });
 
     // 加载大图
     loadImg(newImgSrc, function () {
@@ -54,6 +56,7 @@ function lazyload(options) {
         newImgSrc = void 0;
 
     if (size.h) params = 'h/' + Math.floor(size.h * ZOOM + expand);
+    if (size.w) params = 'w/' + Math.floor(size.w * ZOOM + expand);
     if (size.vw) params = 'w/' + Math.floor(containerW * (size.vw / 100) * ZOOM + expand);
 
     newImgSrc = '' + imgSrc + qiniuAPI + params;
