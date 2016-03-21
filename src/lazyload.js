@@ -21,13 +21,14 @@ function lazyload(options) {
     const w = $this.data('w');
     const h = $this.data('h');
     const vw = $this.data('vw');
+    const cover = $this.data('cover');
 
     if ( typeof src === 'undefined' ) return;
     // 设置小图
     $this.addClass('blur').addClass('loaded').attr('src', `${src}${qiniuAPI}w/20`);
 
     // use qiniu API for image URL
-    const newImgSrc = imgSizeCND(src, { w, h, vw });
+    const newImgSrc = imgSizeCND(src, { w, h, vw, cover });
 
     // 加载大图
     loadImg(newImgSrc, () => {
@@ -42,6 +43,7 @@ function lazyload(options) {
     if (size.h) params = 'h/' + Math.floor( size.h * ZOOM + expand );
     if (size.w) params = 'w/' + Math.floor( size.w * ZOOM + expand );
     if (size.vw) params = 'w/' + Math.floor(containerW * ( size.vw / 100 ) * ZOOM + expand);
+    if (size.cover === 'full') params = 'w/' + Math.floor( window.innerWidth * ZOOM + expand )
 
     newImgSrc = `${imgSrc}${qiniuAPI}${params}`;
     return newImgSrc;

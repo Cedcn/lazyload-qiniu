@@ -1,6 +1,6 @@
 {
   "name": "lazyload-qiniu",
-  "version": "1.0.1",
+  "version": "1.1.1",
   "description": "",
   "main": "index.js",
   "directories": {
@@ -14,7 +14,6 @@
     "jquery": "^2.2.1",
     "mdetect": "^1.2.1"
   },
-  "devDependencies": {},
   "scripts": {
     "start": "webpack-dev-server",
     "babel": "babel src/lazyload.js -o index.js"
