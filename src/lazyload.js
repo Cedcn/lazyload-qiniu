@@ -1,7 +1,7 @@
 import $ from 'jquery';
-import { isRetina } from 'mdetect'
+import mdetect from 'mdetect'
 
-const ZOOM = isRetina() ? 2 : 1;
+const ZOOM = mdetect.isRetina() ? 2 : 1;
 const qiniuAPI = '?imageView2/2/';
 const setting = {
   target: 'body',           // 容器

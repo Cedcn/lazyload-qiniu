@@ -12,9 +12,11 @@ var _jquery2 = _interopRequireDefault(_jquery);
 
 var _mdetect = require('mdetect');
 
+var _mdetect2 = _interopRequireDefault(_mdetect);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var ZOOM = _mdetect.isRetina ? 2 : 1;
+var ZOOM = _mdetect2.default.isRetina() ? 2 : 1;
 var qiniuAPI = '?imageView2/2/';
 var setting = {
   target: 'body', // 容器
