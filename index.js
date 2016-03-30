@@ -35,11 +35,16 @@ function lazyload(options) {
 
   $target.find('img.js-lazy').each(function () {
     var $this = (0, _jquery2.default)(this);
-    var src = $this.data('src');
-    var w = $this.data('w');
-    var h = $this.data('h');
-    var vw = $this.data('vw');
-    var cover = $this.data('cover');
+
+    var _$this$data = $this.data();
+
+    var src = _$this$data.src;
+    var w = _$this$data.w;
+    var h = _$this$data.h;
+    var vw = _$this$data.vw;
+    var cover = _$this$data.cover;
+    var ratio = _$this$data.ratio;
+
 
     if (typeof src === 'undefined') return;
     // 设置小图
@@ -49,8 +54,9 @@ function lazyload(options) {
     var newImgSrc = imgSizeCND(src, { w: w, h: h, vw: vw, cover: cover });
 
     // 加载大图
-    loadImg(newImgSrc, function () {
+    loadImg(newImgSrc, function (imgRatio) {
       $this.removeClass('blur').attr('src', newImgSrc);
+      if (ratio && ratio > imgRatio * 100) $this.addClass('limit');
     });
   });
 
@@ -72,7 +78,8 @@ function lazyload(options) {
 
     largeImg.src = src;
     largeImg.onload = function () {
-      if (typeof cb !== 'undefined') cb();
+      var imgRatio = largeImg.height / largeImg.width;
+      if (typeof cb !== 'undefined') cb(imgRatio);
     };
   }
 }

@@ -17,11 +17,7 @@ function lazyload(options) {
 
   $target.find('img.js-lazy').each(function () {
     const $this = $(this);
-    const src = $this.data('src');
-    const w = $this.data('w');
-    const h = $this.data('h');
-    const vw = $this.data('vw');
-    const cover = $this.data('cover');
+    const { src, w, h, vw, cover, ratio } = $this.data();
 
     if ( typeof src === 'undefined' ) return;
     // 设置小图
@@ -31,8 +27,9 @@ function lazyload(options) {
     const newImgSrc = imgSizeCND(src, { w, h, vw, cover });
 
     // 加载大图
-    loadImg(newImgSrc, () => {
+    loadImg(newImgSrc, (imgRatio) => {
       $this.removeClass('blur').attr('src', newImgSrc);
+      if ( ratio && ratio > imgRatio * 100 ) $this.addClass('limit');
     });
   });
 
@@ -54,7 +51,8 @@ function lazyload(options) {
 
     largeImg.src = src;
     largeImg.onload = () => {
-      if (typeof cb !== 'undefined') cb();
+      const imgRatio = largeImg.height / largeImg.width;
+      if (typeof cb !== 'undefined') cb(imgRatio);
     }
   }
 }
