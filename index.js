@@ -4,83 +4,83 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 var _jquery = require('jquery');
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _mdetect = require('mdetect');
-
-var _mdetect2 = _interopRequireDefault(_mdetect);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var ZOOM = _mdetect2.default.isRetina() ? 2 : 1;
-var qiniuAPI = '?imageView2/2/';
-var setting = {
-  target: 'body', // 容器
-  expand: 30, // 增加的图片像素
-  wrapMaxWidth: 1240 // vw的相对宽度
+var ZOOM = window.devicePixelRatio || 1;
+var qiniuAPI = '?imageView2/';
+var MAX_WIDTH = 1240;
+
+var str = function str(type, size) {
+  return size ? type + '/' + Math.floor(size) + '/' : '';
 };
 
-function lazyload(options) {
-  var newOptions = _extends({}, setting, options);
-  var target = newOptions.target;
-  var expand = newOptions.expand;
-  var wrapMaxWidth = newOptions.wrapMaxWidth;
+function lazyload() {
+  var params = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+  var target = params.target;
+  var maxWidth = params.maxWidth;
 
-  var $target = (0, _jquery2.default)(target);
+  var wrapMaxWidth = maxWidth || MAX_WIDTH;
+  var $target = (0, _jquery2.default)(target || 'body');
   var containerW = window.innerWidth > wrapMaxWidth ? wrapMaxWidth : window.innerWidth;
 
   $target.find('img.js-lazy').each(function () {
     var $this = (0, _jquery2.default)(this);
-
-    var _$this$data = $this.data();
-
-    var src = _$this$data.src;
-    var w = _$this$data.w;
-    var h = _$this$data.h;
-    var vw = _$this$data.vw;
-    var cover = _$this$data.cover;
-    var ratio = _$this$data.ratio;
-
+    var zData = $this.data();
+    var src = zData.src;
 
     if (typeof src === 'undefined' || src === '') return;
-    // 设置小图
-    $this.addClass('blur').addClass('loaded').attr('src', '' + src + qiniuAPI + 'w/20');
 
-    // use qiniu API for image URL
-    var newImgSrc = imgSizeCND(src, { w: w, h: h, vw: vw, cover: cover });
-
-    // 加载大图
-    loadImg(newImgSrc, function (imgRatio) {
-      $this.removeClass('blur').attr('src', newImgSrc);
-      if (ratio && ratio > imgRatio * 100) $this.addClass('limit');
-    });
+    // first load tiny blur img
+    $this.addClass('blur').attr('src', '' + src + qiniuAPI + '2/w/20');
+    // then load source img with calced size
+    zData.cb = function (result) {
+      return $this.removeClass('blur').attr('src', result);
+    };
+    load(zData);
   });
 
-  function imgSizeCND(imgSrc, size) {
-    var params = '',
-        newImgSrc = void 0;
+  function load(_ref) {
+    var src = _ref.src;
+    var w = _ref.w;
+    var h = _ref.h;
+    var vw = _ref.vw;
+    var full = _ref.full;
+    var ratio = _ref.ratio;
+    var cb = _ref.cb;
 
-    if (size.h) params = 'h/' + Math.floor(size.h * ZOOM + expand);
-    if (size.w) params = 'w/' + Math.floor(size.w * ZOOM + expand);
-    if (size.vw) params = 'w/' + Math.floor(containerW * (size.vw / 100) * ZOOM + expand);
-    if (size.cover === 'full') params = 'w/' + Math.floor(window.innerWidth * ZOOM + expand);
-
-    newImgSrc = '' + imgSrc + qiniuAPI + params;
-    return newImgSrc;
-  }
-
-  function loadImg(src, cb) {
+    var params = void 0;
+    var _w = calcW({ w: w, vw: vw, full: full });
+    var wStr = str('w', _w);
+    var hStr = str('h', h);
     var largeImg = new Image();
 
-    largeImg.src = src;
+    if (ratio) {
+      params = '1/' + (_w ? wStr + str('h', _w * ratio) : hStr + str('w', h / ratio));
+    } else {
+      params = '2/' + wStr + hStr;
+    }
+
+    var newSrc = '' + src + qiniuAPI + params;
+    largeImg.src = newSrc;
+
     largeImg.onload = function () {
-      var imgRatio = largeImg.height / largeImg.width;
-      if (typeof cb !== 'undefined') cb(imgRatio);
+      return cb(newSrc);
     };
+  }
+
+  function calcW(_ref2) {
+    var w = _ref2.w;
+    var vw = _ref2.vw;
+    var full = _ref2.full;
+
+    if (full) return window.innerWidth * ZOOM;
+    if (vw) return containerW * (vw / 100) * ZOOM;
+    if (w) return w * ZOOM;
+    return false;
   }
 }
 

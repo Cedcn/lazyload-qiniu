@@ -1,59 +1,54 @@
 import $ from 'jquery';
-import mdetect from 'mdetect'
 
-const ZOOM = mdetect.isRetina() ? 2 : 1;
-const qiniuAPI = '?imageView2/2/';
-const setting = {
-  target: 'body',           // 容器
-  expand: 30,               // 增加的图片像素
-  wrapMaxWidth: 1240        // vw的相对宽度
-}
+const ZOOM = window.devicePixelRatio || 1;
+const qiniuAPI = '?imageView2/';
+const MAX_WIDTH = 1240;
 
-function lazyload(options) {
-  const newOptions = Object.assign({}, setting, options);
-  const { target, expand, wrapMaxWidth } = newOptions;
-  const $target = $(target);
+const str = (type, size) => size ? `${type}/${Math.floor(size)}/` : '';
+
+function lazyload(params = {}) {
+  const { target, maxWidth } = params;
+  const wrapMaxWidth = maxWidth || MAX_WIDTH;
+  const $target = $((target || 'body'));
   const containerW = window.innerWidth > wrapMaxWidth ? wrapMaxWidth : window.innerWidth;
 
   $target.find('img.js-lazy').each(function () {
     const $this = $(this);
-    const { src, w, h, vw, cover, ratio } = $this.data();
+    const zData = $this.data();
+    const { src } = zData;
+    if (typeof src === 'undefined' || src === '') return;
 
-    if ( typeof src === 'undefined' || src === '') return;
-    // 设置小图
-    $this.addClass('blur').addClass('loaded').attr('src', `${src}${qiniuAPI}w/20`);
-
-    // use qiniu API for image URL
-    const newImgSrc = imgSizeCND(src, { w, h, vw, cover });
-
-    // 加载大图
-    loadImg(newImgSrc, (imgRatio) => {
-      $this.removeClass('blur').attr('src', newImgSrc);
-      if ( ratio && ratio > imgRatio * 100 ) $this.addClass('limit');
-    });
+    // first load tiny blur img
+    $this.addClass('blur').attr('src', `${src}${qiniuAPI}2/w/20`);
+    // then load source img with calced size
+    zData.cb = result => $this.removeClass('blur').attr('src', result);
+    load(zData);
   });
 
-  function imgSizeCND (imgSrc, size) {
-    let params = '',
-        newImgSrc;
-
-    if (size.h) params = 'h/' + Math.floor( size.h * ZOOM + expand );
-    if (size.w) params = 'w/' + Math.floor( size.w * ZOOM + expand );
-    if (size.vw) params = 'w/' + Math.floor(containerW * ( size.vw / 100 ) * ZOOM + expand);
-    if (size.cover === 'full') params = 'w/' + Math.floor( window.innerWidth * ZOOM + expand )
-
-    newImgSrc = `${imgSrc}${qiniuAPI}${params}`;
-    return newImgSrc;
-  }
-
-  function loadImg (src, cb) {
+  function load({ src, w, h, vw, full, ratio, cb }) {
+    let params;
+    const _w = calcW({ w, vw, full });
+    const wStr = str('w', _w);
+    const hStr = str('h', h);
     const largeImg = new Image();
 
-    largeImg.src = src;
-    largeImg.onload = () => {
-      const imgRatio = largeImg.height / largeImg.width;
-      if (typeof cb !== 'undefined') cb(imgRatio);
+    if (ratio) {
+      params = `1/${_w ? wStr + str('h', _w * ratio) : hStr + str('w', h/ratio)}`;
+    } else {
+      params = `2/${wStr}${hStr}`;
     }
+
+    const newSrc = `${src}${qiniuAPI}${params}`;
+    largeImg.src = newSrc;
+
+    largeImg.onload = () => cb(newSrc);
+  }
+
+  function calcW({ w, vw, full }) {
+    if (full) return window.innerWidth * ZOOM;
+    if (vw) return containerW * ( vw / 100 ) * ZOOM;
+    if (w) return w * ZOOM;
+    return false;
   }
 }
 
