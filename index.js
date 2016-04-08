@@ -25,7 +25,7 @@ var setting = {
 };
 
 function lazyload(options) {
-  var newOptions = _extends(setting, options);
+  var newOptions = _extends({}, setting, options);
   var target = newOptions.target;
   var expand = newOptions.expand;
   var wrapMaxWidth = newOptions.wrapMaxWidth;
@@ -46,7 +46,7 @@ function lazyload(options) {
     var ratio = _$this$data.ratio;
 
 
-    if (typeof src === 'undefined') return;
+    if (typeof src === 'undefined' || src === '') return;
     // 设置小图
     $this.addClass('blur').addClass('loaded').attr('src', '' + src + qiniuAPI + 'w/20');
 

@@ -10,7 +10,7 @@ const setting = {
 }
 
 function lazyload(options) {
-  const newOptions = Object.assign(setting, options);
+  const newOptions = Object.assign({}, setting, options);
   const { target, expand, wrapMaxWidth } = newOptions;
   const $target = $(target);
   const containerW = window.innerWidth > wrapMaxWidth ? wrapMaxWidth : window.innerWidth;
@@ -19,7 +19,7 @@ function lazyload(options) {
     const $this = $(this);
     const { src, w, h, vw, cover, ratio } = $this.data();
 
-    if ( typeof src === 'undefined' ) return;
+    if ( typeof src === 'undefined' || src === '') return;
     // 设置小图
     $this.addClass('blur').addClass('loaded').attr('src', `${src}${qiniuAPI}w/20`);
 
