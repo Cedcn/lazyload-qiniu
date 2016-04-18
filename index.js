@@ -65,11 +65,10 @@ function lazyload() {
     }
 
     var newSrc = '' + src + qiniuAPI + params;
-    largeImg.src = newSrc;
-
     largeImg.onload = function () {
       return cb(newSrc);
     };
+    largeImg.src = newSrc;
   }
 
   function calcW(_ref2) {

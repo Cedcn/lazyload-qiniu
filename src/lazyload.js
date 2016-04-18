@@ -39,9 +39,8 @@ function lazyload(params = {}) {
     }
 
     const newSrc = `${src}${qiniuAPI}${params}`;
-    largeImg.src = newSrc;
-
     largeImg.onload = () => cb(newSrc);
+    largeImg.src = newSrc;
   }
 
   function calcW({ w, vw, full }) {
