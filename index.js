@@ -18,6 +18,8 @@ var str = function str(type, size) {
   return size ? type + '/' + Math.floor(size) + '/' : '';
 };
 
+var BLUR_EFFECT = false;
+
 function lazyload() {
   var params = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
   var target = params.target;
@@ -34,12 +36,18 @@ function lazyload() {
 
     if (typeof src === 'undefined' || src === '') return;
 
-    // first load tiny blur img
-    $this.addClass('blur').attr('src', '' + src + qiniuAPI + '2/w/20');
-    // then load source img with calced size
-    zData.cb = function (result) {
-      return $this.removeClass('blur').attr('src', result);
-    };
+    if (BLUR_EFFECT) {
+      // first load tiny blur img
+      $this.addClass('blur').attr('src', '' + src + qiniuAPI + '2/w/20');
+      // then load source img with calced size
+      zData.cb = function (result) {
+        return $this.removeClass('blur').attr('src', result);
+      };
+    } else {
+      zData.cb = function (src) {
+        return $this.removeClass('blur').attr('src', src);
+      };
+    }
     load(zData);
   });
 
@@ -65,10 +73,15 @@ function lazyload() {
     }
 
     var newSrc = '' + src + qiniuAPI + params;
-    largeImg.onload = function () {
-      return cb(newSrc);
-    };
-    largeImg.src = newSrc;
+
+    if (BLUR_EFFECT) {
+      largeImg.onload = function () {
+        return cb(newSrc);
+      };
+      largeImg.src = newSrc;
+    } else {
+      cb(newSrc);
+    }
   }
 
   function calcW(_ref2) {

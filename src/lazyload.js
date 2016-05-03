@@ -6,6 +6,8 @@ const MAX_WIDTH = 1240;
 
 const str = (type, size) => size ? `${type}/${Math.floor(size)}/` : '';
 
+const BLUR_EFFECT = false;
+
 function lazyload(params = {}) {
   const { target, maxWidth } = params;
   const wrapMaxWidth = maxWidth || MAX_WIDTH;
@@ -18,10 +20,14 @@ function lazyload(params = {}) {
     const { src } = zData;
     if (typeof src === 'undefined' || src === '') return;
 
-    // first load tiny blur img
-    $this.addClass('blur').attr('src', `${src}${qiniuAPI}2/w/20`);
-    // then load source img with calced size
-    zData.cb = result => $this.removeClass('blur').attr('src', result);
+    if(BLUR_EFFECT) {
+      // first load tiny blur img
+      $this.addClass('blur').attr('src', `${src}${qiniuAPI}2/w/20`);
+      // then load source img with calced size
+      zData.cb = result => $this.removeClass('blur').attr('src', result);
+    } else {
+      zData.cb = src => $this.removeClass('blur').attr('src', src);
+    }
     load(zData);
   });
 
@@ -39,8 +45,14 @@ function lazyload(params = {}) {
     }
 
     const newSrc = `${src}${qiniuAPI}${params}`;
-    largeImg.onload = () => cb(newSrc);
-    largeImg.src = newSrc;
+
+    if (BLUR_EFFECT) {
+      largeImg.onload = () => cb(newSrc);
+      largeImg.src = newSrc;
+    } else {
+      cb(newSrc);
+    }
+
   }
 
   function calcW({ w, vw, full }) {
