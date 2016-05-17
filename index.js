@@ -11,19 +11,21 @@ var _jquery2 = _interopRequireDefault(_jquery);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var ZOOM = window.devicePixelRatio || 1;
-var qiniuAPI = '?imageView2/';
 var MAX_WIDTH = 1240;
 
 var str = function str(type, size) {
   return size ? type + '/' + Math.floor(size) + '/' : '';
 };
-
-var BLUR_EFFECT = false;
+var qiniuAPI = function qiniuAPI(param) {
+  return '?imageView2/' + param + '/interlace/1/q/88/';
+};
 
 function lazyload() {
   var params = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
   var target = params.target;
   var maxWidth = params.maxWidth;
+  var onStart = params.onStart;
+  var onLoad = params.onLoad;
 
   var wrapMaxWidth = maxWidth || MAX_WIDTH;
   var $target = (0, _jquery2.default)(target || 'body');
@@ -36,19 +38,14 @@ function lazyload() {
 
     if (typeof src === 'undefined' || src === '') return;
 
-    if (BLUR_EFFECT) {
-      // first load tiny blur img
-      $this.addClass('blur').attr('src', '' + src + qiniuAPI + '2/w/20');
-      // then load source img with calced size
-      zData.cb = function (result) {
-        return $this.removeClass('blur').attr('src', result);
-      };
-    } else {
-      zData.cb = function (src) {
-        return $this.removeClass('blur').attr('src', src);
-      };
-    }
+    zData.cb = function (src) {
+      if (typeof onLoad === 'function') $this.on('load', function (e) {
+        return onLoad($this, e);
+      });
+      $this.attr('src', src);
+    };
     load(zData);
+    if (typeof onStart === 'function') onStart($this);
   });
 
   function load(_ref) {
@@ -72,16 +69,8 @@ function lazyload() {
       params = '2/' + wStr + hStr;
     }
 
-    var newSrc = '' + src + qiniuAPI + params;
-
-    if (BLUR_EFFECT) {
-      largeImg.onload = function () {
-        return cb(newSrc);
-      };
-      largeImg.src = newSrc;
-    } else {
-      cb(newSrc);
-    }
+    var newSrc = '' + src + qiniuAPI(params);
+    cb(newSrc);
   }
 
   function calcW(_ref2) {

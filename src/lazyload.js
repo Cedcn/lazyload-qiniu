@@ -1,15 +1,13 @@
 import $ from 'jquery';
 
 const ZOOM = window.devicePixelRatio || 1;
-const qiniuAPI = '?imageView2/';
 const MAX_WIDTH = 1240;
 
 const str = (type, size) => size ? `${type}/${Math.floor(size)}/` : '';
-
-const BLUR_EFFECT = false;
+const qiniuAPI = param => `?imageView2/${param}/interlace/1/q/88/`;
 
 function lazyload(params = {}) {
-  const { target, maxWidth } = params;
+  const { target, maxWidth, onStart, onLoad } = params;
   const wrapMaxWidth = maxWidth || MAX_WIDTH;
   const $target = $((target || 'body'));
   const containerW = window.innerWidth > wrapMaxWidth ? wrapMaxWidth : window.innerWidth;
@@ -20,15 +18,12 @@ function lazyload(params = {}) {
     const { src } = zData;
     if (typeof src === 'undefined' || src === '') return;
 
-    if(BLUR_EFFECT) {
-      // first load tiny blur img
-      $this.addClass('blur').attr('src', `${src}${qiniuAPI}2/w/20`);
-      // then load source img with calced size
-      zData.cb = result => $this.removeClass('blur').attr('src', result);
-    } else {
-      zData.cb = src => $this.removeClass('blur').attr('src', src);
-    }
+    zData.cb = src => {
+      if (typeof onLoad === 'function') $this.on('load', e => onLoad($this, e));
+      $this.attr('src', src);
+    };
     load(zData);
+    if (typeof onStart === 'function') onStart($this);
   });
 
   function load({ src, w, h, vw, full, ratio, cb }) {
@@ -44,15 +39,8 @@ function lazyload(params = {}) {
       params = `2/${wStr}${hStr}`;
     }
 
-    const newSrc = `${src}${qiniuAPI}${params}`;
-
-    if (BLUR_EFFECT) {
-      largeImg.onload = () => cb(newSrc);
-      largeImg.src = newSrc;
-    } else {
-      cb(newSrc);
-    }
-
+    const newSrc = `${src}${qiniuAPI(params)}`;
+    cb(newSrc);
   }
 
   function calcW({ w, vw, full }) {
