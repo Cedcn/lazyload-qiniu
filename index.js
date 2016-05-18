@@ -17,7 +17,7 @@ var str = function str(type, size) {
   return size ? type + '/' + Math.floor(size) + '/' : '';
 };
 var qiniuAPI = function qiniuAPI(param) {
-  return '?imageView2/' + param + '/interlace/1/q/88/';
+  return '?imageView2/' + param + 'interlace/1/q/88/';
 };
 
 function lazyload() {

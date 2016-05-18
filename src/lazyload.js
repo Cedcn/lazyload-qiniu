@@ -4,7 +4,7 @@ const ZOOM = window.devicePixelRatio || 1;
 const MAX_WIDTH = 1240;
 
 const str = (type, size) => size ? `${type}/${Math.floor(size)}/` : '';
-const qiniuAPI = param => `?imageView2/${param}/interlace/1/q/88/`;
+const qiniuAPI = param => `?imageView2/${param}interlace/1/q/88/`;
 
 function lazyload(params = {}) {
   const { target, maxWidth, onStart, onLoad } = params;
