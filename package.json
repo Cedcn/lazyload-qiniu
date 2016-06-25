@@ -11,7 +11,9 @@
   },
   "scripts": {
     "start": "webpack-dev-server",
-    "build": "babel src/lazyload.js -o index.js"
+    "build": "babel src/lazyload.js -o index.js",
+    "example": "browserify example/src.js -o example/bundle.js -t [ babelify --presets [ es2015 ] ]",
+    "g": "npm run build && npm run example"
   },
   "author": "",
   "license": "ISC",

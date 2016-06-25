@@ -1,5 +1,3 @@
-import $ from 'jquery';
-
 const ZOOM = window.devicePixelRatio || 1;
 const MAX_WIDTH = 1240;
 
@@ -9,21 +7,26 @@ const qiniuAPI = param => `?imageView2/${param}interlace/1/q/88/`;
 function lazyload(params = {}) {
   const { target, maxWidth, onStart, onLoad } = params;
   const wrapMaxWidth = maxWidth || MAX_WIDTH;
-  const $target = $((target || 'body'));
   const containerW = window.innerWidth > wrapMaxWidth ? wrapMaxWidth : window.innerWidth;
 
-  $target.find('img.js-lazy').each(function () {
-    const $this = $(this);
-    const zData = $this.data();
+  const $imgs = document.querySelectorAll(`${target || 'body'} img.js-lazy`);
+
+  [...$imgs].forEach(x => {
+    const zData = {};
+
+    Object.keys(x.dataset).forEach(z => {
+      zData[z] = x.dataset[z];
+    });
+
     const { src } = zData;
     if (typeof src === 'undefined' || src === '') return;
 
     zData.cb = src => {
-      if (typeof onLoad === 'function') $this.on('load', e => onLoad($this, e));
-      $this.attr('src', src);
+      if (typeof onLoad === 'function') x.onload = e => onLoad(x, e);
+      x.src = src;
     };
     load(zData);
-    if (typeof onStart === 'function') onStart($this);
+    if (typeof onStart === 'function') onStart(x);
   });
 
   function load({ src, w, h, vw, full, ratio, cb }) {
