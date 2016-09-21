@@ -29,11 +29,11 @@ function lazyload() {
   var $imgs = document.querySelectorAll((target || 'body') + ' img.js-lazy');
 
   [].concat(_toConsumableArray($imgs)).forEach(function (x) {
-    var zData = [].concat(_toConsumableArray(x.dataset));
-    //
-    // Object.keys(x.dataset).forEach(x => {
-    //   zData[x] = x;
-    // });
+    var zData = {};
+
+    Object.keys(x.dataset).forEach(function (z) {
+      zData[z] = x.dataset[z];
+    });
 
     var src = zData.src;
 

@@ -1,14 +1,12 @@
 {
   "name": "lazyload-qiniu",
-  "version": "1.3.2",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "directories": {
     "example": "example"
   },
-  "dependencies": {
-    "jquery": "^2.2.1"
-  },
+  "dependencies": {},
   "scripts": {
     "start": "webpack-dev-server",
     "build": "babel src/lazyload.js -o index.js",
