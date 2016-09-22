@@ -13,25 +13,17 @@ var str = function str(type, size) {
   return size ? type + '/' + Math.floor(size) + '/' : '';
 };
 var qiniuAPI = function qiniuAPI(param) {
-  return '?imageView2/' + param + 'interlace/1/q/88/';
+  return '?imageView2/' + param + 'interlace/1/q/88/ignore-error/1/';
 };
+
+var isSupportWebp = false;
+
+if (typeof Modernizr !== 'undefined') {
+  isSupportWebp = Modernizr.webp;
+}
+
 var webp = function webp(str) {
-  return webpSupport ? str + 'format/webp/' : str;
-};
-
-var webpSupport = void 0;
-
-// detect webp support
-var init = function init(params) {
-  if (typeof Modernizr === 'undefined') {
-    webpSupport = false;
-    lazyload(params);
-  } else {
-    Modernizr.on('webp', function (result) {
-      webpSupport = !!result;
-      lazyload(params);
-    });
-  }
+  return isSupportWebp ? str + 'format/webp/' : str;
 };
 
 function lazyload() {
@@ -104,4 +96,4 @@ function lazyload() {
   }
 }
 
-exports.default = init;
+exports.default = lazyload;

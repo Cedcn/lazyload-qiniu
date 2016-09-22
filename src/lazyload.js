@@ -2,24 +2,15 @@ const ZOOM = window.devicePixelRatio || 1;
 const MAX_WIDTH = 1240;
 
 const str = (type, size) => size ? `${type}/${Math.floor(size)}/` : '';
-const qiniuAPI = param => `?imageView2/${param}interlace/1/q/88/`;
-const webp = str => webpSupport ? `${str}format/webp/` : str;
+const qiniuAPI = param => `?imageView2/${param}interlace/1/q/88/ignore-error/1/`;
 
-let webpSupport;
+let isSupportWebp = false;
 
-// detect webp support
-const init = params => {
-  if (typeof Modernizr === 'undefined') {
-    webpSupport = false;
-    lazyload(params);
-  } else {
-    Modernizr.on('webp', result => {
-      webpSupport = !!result;
-      lazyload(params);
-    });
-  }
+if (typeof Modernizr !== 'undefined') {
+  isSupportWebp = Modernizr.webp;
+}
 
-};
+const webp = str => isSupportWebp ? `${str}format/webp/` : str;
 
 function lazyload(params = {}) {
   const { target, maxWidth, onStart, onLoad } = params;
@@ -72,4 +63,4 @@ function lazyload(params = {}) {
   }
 }
 
-export default init;
+export default lazyload;
