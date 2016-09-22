@@ -15,6 +15,24 @@ var str = function str(type, size) {
 var qiniuAPI = function qiniuAPI(param) {
   return '?imageView2/' + param + 'interlace/1/q/88/';
 };
+var webp = function webp(str) {
+  return webpSupport ? str + 'format/webp/' : str;
+};
+
+var webpSupport = void 0;
+
+// detect webp support
+var init = function init(params) {
+  if (typeof Modernizr === 'undefined') {
+    webpSupport = false;
+    lazyload(params);
+  } else {
+    Modernizr.on('webp', function (result) {
+      webpSupport = !!result;
+      lazyload(params);
+    });
+  }
+};
 
 function lazyload() {
   var params = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
@@ -49,14 +67,14 @@ function lazyload() {
     if (typeof onStart === 'function') onStart(x);
   });
 
-  function load(_ref) {
-    var src = _ref.src;
-    var w = _ref.w;
-    var h = _ref.h;
-    var vw = _ref.vw;
-    var full = _ref.full;
-    var ratio = _ref.ratio;
-    var cb = _ref.cb;
+  function load(args) {
+    var src = args.src;
+    var w = args.w;
+    var h = args.h;
+    var vw = args.vw;
+    var full = args.full;
+    var ratio = args.ratio;
+    var cb = args.cb;
 
     var params = void 0;
     var _w = calcW({ w: w, vw: vw, full: full });
@@ -71,13 +89,13 @@ function lazyload() {
     }
 
     var newSrc = '' + src + qiniuAPI(params);
-    cb(newSrc);
+    cb(webp(newSrc));
   }
 
-  function calcW(_ref2) {
-    var w = _ref2.w;
-    var vw = _ref2.vw;
-    var full = _ref2.full;
+  function calcW(_ref) {
+    var w = _ref.w;
+    var vw = _ref.vw;
+    var full = _ref.full;
 
     if (full) return window.innerWidth * ZOOM;
     if (vw) return containerW * (vw / 100) * ZOOM;
@@ -86,4 +104,4 @@ function lazyload() {
   }
 }
 
-exports.default = lazyload;
+exports.default = init;

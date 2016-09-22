@@ -3,6 +3,23 @@ const MAX_WIDTH = 1240;
 
 const str = (type, size) => size ? `${type}/${Math.floor(size)}/` : '';
 const qiniuAPI = param => `?imageView2/${param}interlace/1/q/88/`;
+const webp = str => webpSupport ? `${str}format/webp/` : str;
+
+let webpSupport;
+
+// detect webp support
+const init = params => {
+  if (typeof Modernizr === 'undefined') {
+    webpSupport = false;
+    lazyload(params);
+  } else {
+    Modernizr.on('webp', result => {
+      webpSupport = !!result;
+      lazyload(params);
+    });
+  }
+
+};
 
 function lazyload(params = {}) {
   const { target, maxWidth, onStart, onLoad } = params;
@@ -29,7 +46,8 @@ function lazyload(params = {}) {
     if (typeof onStart === 'function') onStart(x);
   });
 
-  function load({ src, w, h, vw, full, ratio, cb }) {
+  function load(args) {
+    const { src, w, h, vw, full, ratio, cb } = args;
     let params;
     const _w = calcW({ w, vw, full });
     const wStr = str('w', _w);
@@ -43,7 +61,7 @@ function lazyload(params = {}) {
     }
 
     const newSrc = `${src}${qiniuAPI(params)}`;
-    cb(newSrc);
+    cb(webp(newSrc));
   }
 
   function calcW({ w, vw, full }) {
@@ -54,4 +72,4 @@ function lazyload(params = {}) {
   }
 }
 
-export default lazyload;
+export default init;
