@@ -18,9 +18,9 @@ var qiniuAPI = function qiniuAPI(param) {
 
 var isSupportWebp = false;
 
-if (typeof Modernizr !== 'undefined') {
-  isSupportWebp = Modernizr.webp;
-}
+if (typeof Modernizr !== 'undefined') Modernizr.on('webp', function (x) {
+  return isSupportWebp = x == true;
+});
 
 var webp = function webp(str) {
   return isSupportWebp ? str + 'format/webp/' : str;

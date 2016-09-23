@@ -6,9 +6,7 @@ const qiniuAPI = param => `?imageView2/${param}interlace/1/q/88/ignore-error/1/`
 
 let isSupportWebp = false;
 
-if (typeof Modernizr !== 'undefined') {
-  isSupportWebp = Modernizr.webp;
-}
+if (typeof Modernizr !== 'undefined') Modernizr.on('webp', x => isSupportWebp = x == true);
 
 const webp = str => isSupportWebp ? `${str}format/webp/` : str;
 
