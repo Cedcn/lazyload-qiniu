@@ -18,9 +18,20 @@ var qiniuAPI = function qiniuAPI(param) {
 
 var isSupportWebp = false;
 
-if (typeof Modernizr !== 'undefined') Modernizr.on('webp', function (x) {
-  return isSupportWebp = x == true;
-});
+var KEY = 'modernizr_support_webp';
+
+if (localStorage.getItem(KEY)) {
+  isSupportWebp = true;
+} else {
+  if (typeof Modernizr !== 'undefined') {
+    Modernizr.on('webp', function (x) {
+      if (x) {
+        isSupportWebp = true;
+        localStorage.setItem(KEY, true);
+      }
+    });
+  }
+}
 
 var webp = function webp(str) {
   return isSupportWebp ? str + 'format/webp/' : str;
