@@ -31,7 +31,7 @@ function lazyload(params = {}) {
 
   const $imgs = document.querySelectorAll(`${target || 'body'} img.js-lazy`);
 
-  [...$imgs].forEach(x => {
+  [].forEach.call($imgs, x => {
     const zData = {};
 
     Object.keys(x.dataset).forEach(z => {

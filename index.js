@@ -3,9 +3,6 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 var ZOOM = window.devicePixelRatio || 1;
 var MAX_WIDTH = 1240;
 
@@ -49,7 +46,7 @@ function lazyload() {
 
   var $imgs = document.querySelectorAll((target || 'body') + ' img.js-lazy');
 
-  [].concat(_toConsumableArray($imgs)).forEach(function (x) {
+  [].forEach.call($imgs, function (x) {
     var zData = {};
 
     Object.keys(x.dataset).forEach(function (z) {
