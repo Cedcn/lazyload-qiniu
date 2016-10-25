@@ -1,31 +1,56 @@
-import $ from 'jquery';
-
 const ZOOM = window.devicePixelRatio || 1;
-const qiniuAPI = '?imageView2/';
 const MAX_WIDTH = 1240;
 
 const str = (type, size) => size ? `${type}/${Math.floor(size)}/` : '';
+const qiniuAPI = param => `?imageView2/${param}interlace/1/q/88/ignore-error/1/`;
+
+let isSupportWebp = false;
+
+const KEY = 'modernizr_support_webp';
+
+if (localStorage.getItem(KEY)) {
+  isSupportWebp = true;
+} else {
+  if (typeof Modernizr !== 'undefined') {
+    Modernizr.on('webp', x => {
+      if (x) {
+        isSupportWebp = true;
+        localStorage.setItem(KEY, true);
+      }
+    });
+  }
+}
+
+
+const webp = str => isSupportWebp ? `${str}format/webp/` : str;
 
 function lazyload(params = {}) {
-  const { target, maxWidth } = params;
+  const { target, maxWidth, onStart, onLoad } = params;
   const wrapMaxWidth = maxWidth || MAX_WIDTH;
-  const $target = $((target || 'body'));
   const containerW = window.innerWidth > wrapMaxWidth ? wrapMaxWidth : window.innerWidth;
 
-  $target.find('img.js-lazy').each(function () {
-    const $this = $(this);
-    const zData = $this.data();
+  const $imgs = document.querySelectorAll(`${target || 'body'} img.js-lazy`);
+
+  [].forEach.call($imgs, x => {
+    const zData = {};
+
+    Object.keys(x.dataset).forEach(z => {
+      zData[z] = x.dataset[z];
+    });
+
     const { src } = zData;
     if (typeof src === 'undefined' || src === '') return;
 
-    // first load tiny blur img
-    $this.addClass('blur').attr('src', `${src}${qiniuAPI}2/w/20`);
-    // then load source img with calced size
-    zData.cb = result => $this.removeClass('blur').attr('src', result);
+    zData.cb = src => {
+      if (typeof onLoad === 'function') x.onload = e => onLoad(x, e);
+      x.src = src;
+    };
     load(zData);
+    if (typeof onStart === 'function') onStart(x);
   });
 
-  function load({ src, w, h, vw, full, ratio, cb }) {
+  function load(args) {
+    const { src, w, h, vw, full, ratio, cb } = args;
     let params;
     const _w = calcW({ w, vw, full });
     const wStr = str('w', _w);
@@ -38,10 +63,8 @@ function lazyload(params = {}) {
       params = `2/${wStr}${hStr}`;
     }
 
-    const newSrc = `${src}${qiniuAPI}${params}`;
-    largeImg.src = newSrc;
-
-    largeImg.onload = () => cb(newSrc);
+    const newSrc = `${src}${qiniuAPI(params)}`;
+    cb(webp(newSrc));
   }
 
   function calcW({ w, vw, full }) {

@@ -1,19 +1,17 @@
 {
   "name": "lazyload-qiniu",
-  "version": "1.2.6",
+  "version": "2.0.5",
   "description": "",
   "main": "index.js",
   "directories": {
     "example": "example"
   },
-  "dependencies": {
-    "jquery": "^2.2.1"
-  },
+  "dependencies": {},
   "scripts": {
-    "start": "webpack-dev-server",
+    "start": "beefy example/src.js 8080 -- -t [ babelify --presets [ es2015 ] ]",
     "build": "babel src/lazyload.js -o index.js"
   },
-  "author": "",
+  "author": "Vanilla",
   "license": "ISC",
   "devDependencies": {
     "babel": "^6.5.2",

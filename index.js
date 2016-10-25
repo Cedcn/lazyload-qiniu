@@ -3,54 +3,78 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _jquery = require('jquery');
-
-var _jquery2 = _interopRequireDefault(_jquery);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var ZOOM = window.devicePixelRatio || 1;
-var qiniuAPI = '?imageView2/';
 var MAX_WIDTH = 1240;
 
 var str = function str(type, size) {
   return size ? type + '/' + Math.floor(size) + '/' : '';
+};
+var qiniuAPI = function qiniuAPI(param) {
+  return '?imageView2/' + param + 'interlace/1/q/88/ignore-error/1/';
+};
+
+var isSupportWebp = false;
+
+var KEY = 'modernizr_support_webp';
+
+if (localStorage.getItem(KEY)) {
+  isSupportWebp = true;
+} else {
+  if (typeof Modernizr !== 'undefined') {
+    Modernizr.on('webp', function (x) {
+      if (x) {
+        isSupportWebp = true;
+        localStorage.setItem(KEY, true);
+      }
+    });
+  }
+}
+
+var webp = function webp(str) {
+  return isSupportWebp ? str + 'format/webp/' : str;
 };
 
 function lazyload() {
   var params = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
   var target = params.target;
   var maxWidth = params.maxWidth;
+  var onStart = params.onStart;
+  var onLoad = params.onLoad;
 
   var wrapMaxWidth = maxWidth || MAX_WIDTH;
-  var $target = (0, _jquery2.default)(target || 'body');
   var containerW = window.innerWidth > wrapMaxWidth ? wrapMaxWidth : window.innerWidth;
 
-  $target.find('img.js-lazy').each(function () {
-    var $this = (0, _jquery2.default)(this);
-    var zData = $this.data();
+  var $imgs = document.querySelectorAll((target || 'body') + ' img.js-lazy');
+
+  [].forEach.call($imgs, function (x) {
+    var zData = {};
+
+    Object.keys(x.dataset).forEach(function (z) {
+      zData[z] = x.dataset[z];
+    });
+
     var src = zData.src;
 
     if (typeof src === 'undefined' || src === '') return;
 
-    // first load tiny blur img
-    $this.addClass('blur').attr('src', '' + src + qiniuAPI + '2/w/20');
-    // then load source img with calced size
-    zData.cb = function (result) {
-      return $this.removeClass('blur').attr('src', result);
+    zData.cb = function (src) {
+      if (typeof onLoad === 'function') x.onload = function (e) {
+        return onLoad(x, e);
+      };
+      x.src = src;
     };
     load(zData);
+    if (typeof onStart === 'function') onStart(x);
   });
 
-  function load(_ref) {
-    var src = _ref.src;
-    var w = _ref.w;
-    var h = _ref.h;
-    var vw = _ref.vw;
-    var full = _ref.full;
-    var ratio = _ref.ratio;
-    var cb = _ref.cb;
+  function load(args) {
+    var src = args.src;
+    var w = args.w;
+    var h = args.h;
+    var vw = args.vw;
+    var full = args.full;
+    var ratio = args.ratio;
+    var cb = args.cb;
 
     var params = void 0;
     var _w = calcW({ w: w, vw: vw, full: full });
@@ -64,18 +88,14 @@ function lazyload() {
       params = '2/' + wStr + hStr;
     }
 
-    var newSrc = '' + src + qiniuAPI + params;
-    largeImg.src = newSrc;
-
-    largeImg.onload = function () {
-      return cb(newSrc);
-    };
+    var newSrc = '' + src + qiniuAPI(params);
+    cb(webp(newSrc));
   }
 
-  function calcW(_ref2) {
-    var w = _ref2.w;
-    var vw = _ref2.vw;
-    var full = _ref2.full;
+  function calcW(_ref) {
+    var w = _ref.w;
+    var vw = _ref.vw;
+    var full = _ref.full;
 
     if (full) return window.innerWidth * ZOOM;
     if (vw) return containerW * (vw / 100) * ZOOM;
